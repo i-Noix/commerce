@@ -35,9 +35,8 @@ class CreatePageForm(forms.Form):
 
 # Views all active auction in page active listing
 def index(request):
-    active_auctions = AuctionListings.objects.all()
     return render(request, "auctions/index.html", {
-        "auctions": active_auctions
+        "auctions": AuctionListings.objects.all()
     })
 
 
@@ -122,13 +121,23 @@ def create_listing(request):
         "new_auction_form": new_auction_form
     })
 
-# Create page "Watchlist"
+# Create feature add auction to page "Watchlist"
 
+
+    
+    
+# def watchlist_page(request):
+    
 
 
 # Create page listing
-def listing(request, title):
-    auction_listing = AuctionListings.objects.get(title=title)
-    return render(request, "auctions/listing.html", {
-        "auction_listing": auction_listing
+def listing(request, auction_id):
+    try:
+        auction = AuctionListings.objects.get(pk=auction_id)
+        return render(request, "auctions/listing.html", {
+            "auction": auction
     })
+    except AuctionListings.DoesNotExist:
+        return render(request, "auctions/error.html", {
+            "message": "Auction listing does not exist"
+        })
