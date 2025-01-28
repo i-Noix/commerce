@@ -14,18 +14,14 @@ class CreatePageForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'})
         )
     description = forms.CharField(
-        max_length=255,
         label="Description of the auction listing",
         widget=forms.Textarea(attrs={'class': 'form-control'})
         )
-    start_bid = forms.IntegerField(
+    start_bid = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
         label="Initial bid",
         widget=forms.NumberInput(attrs={'class': 'form-control'})
-        )
-    category = forms.CharField(
-        max_length=64,
-        label="Category",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
         )
     image_url = forms.URLField(
         max_length=200,
@@ -99,7 +95,6 @@ def create_listing(request):
             title = form.cleaned_data["title"]
             description = form.cleaned_data["description"]
             start_bid = form.cleaned_data["start_bid"]
-            category = form.cleaned_data["category"]
             image_url = form.cleaned_data["image_url"]
 
             # Creating a new object to AuctionListings
@@ -107,7 +102,6 @@ def create_listing(request):
                 title=title,
                 description=description,
                 start_bid=start_bid,
-                category=category,
                 image_url=image_url,
                 author=request.user
             )

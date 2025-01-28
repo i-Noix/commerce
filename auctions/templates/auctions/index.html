@@ -3,15 +3,14 @@
 {% block body %}
     <h2>Active Listings</h2>
     {% for auction in auctions %}
-        <div class="auction-container" style="margin: 20px; padding: 10px; display: flex; align-items: center; width: 80%; box-sizing: border-box;">
-            <div style="margin-right: 20px; height: 400px; width: 450px;" >
+        <div class="auction_container">
+            <div class="auction_content">
                 <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}" height="100%" width="100%">
             </div>
-            <div style="font-family: Arial, Helvetica, sans-serif;">
+            <div>
                 <h5><a href="{% url 'listing' auction.id %}">{{ auction.title }}</a></h5>
                 <ul>
-                    <li>{{ auction.description }}</li>
-                    <li>Price: ${{ auction.start_bid }}</li>
+                    <li><span style="font-weight: bold;">Price:</span> ${{ auction.start_bid }}</li>
                     <li>Created {{ auction.date_time }}</li>
                 </ul>
             </div>

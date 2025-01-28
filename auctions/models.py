@@ -15,7 +15,7 @@ class AuctionListings(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField()
     start_bid = models.DecimalField(max_digits=10, decimal_places=2)
-    categories = models.ManyToManyField(Category, related_name="auctions")
+    categories = models.ManyToManyField(Category, blank=True,  related_name="auctions")
     image_url = models.URLField(max_length=200, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="auctions")
     date_time = models.DateTimeField(auto_now_add=True)
