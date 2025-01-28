@@ -1,0 +1,32 @@
+{% extends 'auctions/layout.html' %}
+
+{% block title %}
+    {{ auction.title }}
+{% endblock %}
+
+{% block body %}
+    <h3>Listing: {{ auction.title }} </h3>
+    <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+    <br>
+    <p> {{ auction.description }}</p>
+    <p>${{ auction.start_bid }}</p>
+    <h5>Details</h5>
+    <ul>
+        <li>Listed by: {{ auction.author }}</li>
+        {% if auction.categories.all %}
+            <li>Category: 
+                {% for category in auction.categories.all %}
+                    {{ category.name }} {% if not forloop.last %}, {% endif %} 
+                {% endfor %}
+            </li>
+        {% else %}
+            <li>Category: not selected </li>
+        {% endif %}
+    </ul>
+    
+    <!-- Create the able to add the item to "Watchlist" -->
+    {% if user.is_authenticated %}
+        
+    {% endif %}
+
+{% endblock %}
