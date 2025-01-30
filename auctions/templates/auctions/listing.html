@@ -9,7 +9,26 @@
     <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
     <br>
     <p> {{ auction.description }}</p>
-    <p>${{ auction.start_bid }}</p>
+    <p>Start Bid: ${{ auction.start_bid }}. Current Bid: ${{ current_bid }}</p>
+
+    {% if user.is_authenticated %}
+        <form action="{% url 'bids' auction.id %}" method="post">
+            {% csrf_token %}
+            <input class="form-control" type="text" name="bid">
+            <input type="submit" value="Place Bid">
+        </form>
+        {% if error_message %}
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> {{ error_message }}</a>
+            </div>
+        {% endif %}
+        {% if success_message %}
+        <div class="alert alert-success">
+            <strong>Success!</strong> {{ success_message }}</a>
+        </div>
+        {% endif %}
+    {% endif %}
+
     <h5>Details</h5>
     <ul>
         <li>Listed by: {{ auction.author }}</li>
@@ -24,8 +43,19 @@
         {% endif %}
     </ul>
     
-    <!-- Create the able to add the item to "Watchlist" -->
+    <!-- Create the able to add or remove the item to "Watchlist" -->
     {% if user.is_authenticated %}
+        {% if auction.id in watchlist %}
+            <form action="{% url 'remove_from_watchlist' auction.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Remove From Watchlist">
+            </form>
+        {% else %}
+            <form action="{% url 'add_to_watchlist' auction.id %}" method="post">
+                {%  csrf_token %}
+                <input type="submit" value="Add To Watchlist">
+            </form>
+        {% endif %}
         
     {% endif %}
 

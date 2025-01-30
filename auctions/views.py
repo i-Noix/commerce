@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django import forms
+from django.views.decorators.http import require_POST
+
 
 from .models import AuctionListings, User, Category, Bids, Comments, Watchlist
 
@@ -17,9 +19,15 @@ class CreatePageForm(forms.Form):
         label="Description of the auction listing:",
         widget=forms.Textarea(attrs={'class': 'form-control'})
     )
-    category = forms.CharField(
+    existing_category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        label="Category (choose from existing):",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    new_category = forms.CharField(
         max_length=64,
-        label="Category:",
+        label="or add a new category:",
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False
     )
@@ -103,7 +111,8 @@ def create_listing(request):
             description = form.cleaned_data["description"]
             start_bid = form.cleaned_data["start_bid"]
             image_url = form.cleaned_data["image_url"]
-            category_name = form.cleaned_data["category"]
+            existing_category = form.cleaned_data["existing_category"]
+            new_category = form.cleaned_data["new_category"]
 
             # Creating a new object to AuctionListings
             new_auction_listing = AuctionListings(
@@ -117,11 +126,16 @@ def create_listing(request):
             # Save object to database AuctionListings
             new_auction_listing.save()
 
-            # Creating or getting the Category object
-            category, created = Category.objects.get_or_create(name=category_name)
+            # Define the category
+            if new_category:
+                # Creating or get the new category 
+                category, created = Category.objects.get_or_create(name=new_category)
+            else:
+                category = existing_category
 
             # Add the category to the auction listing
-            new_auction_listing.categories.add(category)
+            if category:
+                new_auction_listing.categories.add(category)
             return HttpResponseRedirect(reverse('index'))
     else:
         form = CreatePageForm()
@@ -130,22 +144,94 @@ def create_listing(request):
         })
 
 # Create feature add auction to page "Watchlist"
+def add_to_watchlist(request, auction_id):
+    if request.method == "POST":
+        # Check if auction exist in the AuctionListings
+        auction = get_object_or_404(AuctionListings, pk=auction_id)
+        
+        # Add auction to Watchlist
+        add_auction = Watchlist(
+            user = request.user,
+            auction = auction
+        )
+        # Save auction
+        add_auction.save()
+        return HttpResponseRedirect(reverse("listing", args=[auction_id]))
 
+# Create feature to remove auction from the page "Watchlist"
+def remove_from_watchlist(request, auction_id):
+    if request.method == "POST":
+        # Check if auction exist in the Watchlist
+        auction = get_object_or_404(AuctionListings, pk=auction_id)
 
+        # Remove auction from Watchlist
+        Watchlist.objects.filter(user=request.user, auction=auction).delete()
+        return HttpResponseRedirect(reverse("listing", args=[auction_id]))
     
-    
-# def watchlist_page(request):
-    
-
+# Create page watchlist
+def watchlist_page(request):
+    user_watchlist = Watchlist.objects.filter(user=request.user)
+    auction_ids_from_watchlist = AuctionListings.objects.filter(id__in=user_watchlist.values_list('auction', flat=True))
+    return render(request, "auctions/watchlist_page.html", {
+        "watchlist": auction_ids_from_watchlist
+    })
 
 # Create page listing
 def listing(request, auction_id):
     try:
+        # Take auction from AucionListings
         auction = AuctionListings.objects.get(pk=auction_id)
+
+        # Take user watchlist
+        user_watchlist = Watchlist.objects.filter(user=request.user)
+        auction_ids_from_watchlist = user_watchlist.values_list('auction__id', flat=True)
+
+        # Take actual bids for this auction
+        bids_for_auction = auction.bids.all()
+        only_bids = bids_for_auction.values_list('bid_amount', flat=True)
+        max_bid = max(only_bids, default=0)
+
         return render(request, "auctions/listing.html", {
-            "auction": auction
+            "auction": auction,
+            "watchlist": auction_ids_from_watchlist,
+            "current_bid": max_bid,
+            "success_message": request.session.pop('success_message', None),
+            "error_message": request.session.pop('error_message', None)
     })
     except AuctionListings.DoesNotExist:
         return render(request, "auctions/error.html", {
             "message": "Auction listing does not exist"
         })
+
+# Created bid feature on listing page
+@require_POST
+def bids(request, auction_id):
+    if request.method == "POST":
+        # Take bid that user input
+        bid = float(request.POST["bid"])
+
+        # Take auction for this bid
+        auction = get_object_or_404(AuctionListings, pk=auction_id)
+
+        # Take all bids of that auction in Bids
+        bids_for_auction = auction.bids.all()
+
+        # Take only bid from Queryset and max bid
+        only_bids = bids_for_auction.values_list("bid_amount", flat=True)
+        max_bid=max(only_bids, default=0)
+
+        # Check if bid > start bid and > highest bid_amount
+        if bid > auction.start_bid and bid > max_bid:
+            # Add bid to Bids
+            new_bid = Bids (
+                auction = auction,
+                bidder = request.user,
+                bid_amount = bid
+            )
+            # Save new bid
+            new_bid.save()
+            request.session['success_message'] = "Your bid was succeful!"
+        else:
+            request.session['error_message'] = "Your bid must be higher than current highest bid and the starting bid."
+        
+        return redirect("listing", auction_id)
