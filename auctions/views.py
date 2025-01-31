@@ -199,11 +199,12 @@ def listing(request, auction_id):
     if request.user.is_authenticated:
         user_watchlist = Watchlist.objects.filter(user=request.user)
         auction_ids_from_watchlist = user_watchlist.values_list('auction__id', flat=True)
-        if request.user == highest_bid.bidder:
+        if highest_bid and request.user == highest_bid.bidder:
             winner = True
             winner_message = f"Conglaturation! Your has won this auction with bid ${highest_bid.bid_amount}"
         else:
             winner = False
+            winner_message = None
 
         return render(request, "auctions/listing.html", {
             "auction": auction,
@@ -222,7 +223,7 @@ def listing(request, auction_id):
             "current_bid": highest_bid,
         })
 
-# Created bid feature on listing page
+# Feature bid on listing page
 @require_POST
 def bids(request, auction_id):
     # Take bid that user input
@@ -254,7 +255,7 @@ def bids(request, auction_id):
     
     return redirect("listing", auction_id)
     
-# Create feature for close an auction
+# Feature for close an auction
 @require_POST
 def close_auction(request, auction_id):
     # Take auction from AuctionListing or views 404
@@ -265,13 +266,13 @@ def close_auction(request, auction_id):
     auction.save()
     return redirect('listing', auction_id)
 
-# Create feature for add comment
+# Feature for add comment
 @require_POST
 def add_comment(request, auction_id):
     # Take auction from AuctionListing
     auction = get_object_or_404(AuctionListings, pk=auction_id)
 
-    # Created a new object and add to Comments
+    # Creating a new object and adding it to Comments
     new_comment = Comments (
         auction = auction,
         comment = request.POST.get("comment"), 
@@ -285,5 +286,24 @@ def add_comment(request, auction_id):
     # Redirect user to the page listing
     return redirect('listing', auction_id)
 
+# Page Categories
+def categories_page(request):
+    categories = Category.objects.all()
+    return render(request, "auctions/categories_page.html", {
+        "categories": categories
+    })
+
+# Page Category
+def category(request, category_id):
+    # Take category from Category
+    category = get_object_or_404(Category, pk=category_id)
+
+    # Take all auctions in this category
+    auctions = category.auctions.all()
+
+    return render(request, 'auctions/category.html', {
+        "category": category,
+        "auctions": auctions
+    })
 
         
