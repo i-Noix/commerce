@@ -46,8 +46,16 @@ class CreatePageForm(forms.Form):
 
 # Views all active auction in page active listing
 def index(request):
+    auctions = AuctionListings.objects.all()
+    winner_list = []
+    for auction in auctions:
+        if not auction.is_active:
+            # Take the winner of auction use the related name from Bids
+            winner_bid = auction.bids.all().order_by('-bid_amount').first()
+            winner_list.append(winner_bid)
     return render(request, "auctions/index.html", {
-        "auctions": AuctionListings.objects.all()
+        "auctions": AuctionListings.objects.all(),
+        "winner_list": winner_list
     })
 
 
@@ -178,29 +186,29 @@ def watchlist_page(request):
 
 # Create page listing
 def listing(request, auction_id):
-    try:
-        # Take auction from AucionListings
-        auction = AuctionListings.objects.get(pk=auction_id)
+    # Take auction from AucionListings
+    auction = get_object_or_404(AuctionListings, pk=auction_id)
 
-        # Take user watchlist
+    # Take object from Bids that has highest bid_amount for this auction
+    highest_bid = auction.bids.all().order_by('-bid_amount').first()
+
+    # if user is authenticated take user watchlist
+    if request.user.is_authenticated:
         user_watchlist = Watchlist.objects.filter(user=request.user)
         auction_ids_from_watchlist = user_watchlist.values_list('auction__id', flat=True)
-
-        # Take actual bids for this auction
-        bids_for_auction = auction.bids.all()
-        only_bids = bids_for_auction.values_list('bid_amount', flat=True)
-        max_bid = max(only_bids, default=0)
 
         return render(request, "auctions/listing.html", {
             "auction": auction,
             "watchlist": auction_ids_from_watchlist,
-            "current_bid": max_bid,
+            "current_bid": highest_bid,
             "success_message": request.session.pop('success_message', None),
             "error_message": request.session.pop('error_message', None)
-    })
-    except AuctionListings.DoesNotExist:
-        return render(request, "auctions/error.html", {
-            "message": "Auction listing does not exist"
+        })
+    
+    else:
+        return render(request, "auctions/listing.html", {
+            "auction": auction,
+            "current_bid": highest_bid,
         })
 
 # Created bid feature on listing page
@@ -220,8 +228,8 @@ def bids(request, auction_id):
         only_bids = bids_for_auction.values_list("bid_amount", flat=True)
         max_bid=max(only_bids, default=0)
 
-        # Check if bid > start bid and > highest bid_amount
-        if bid > auction.start_bid and bid > max_bid:
+        # Check if bid >= start bid and > highest bid_amount
+        if bid >= auction.start_bid and bid > max_bid:
             # Add bid to Bids
             new_bid = Bids (
                 auction = auction,
@@ -235,3 +243,17 @@ def bids(request, auction_id):
             request.session['error_message'] = "Your bid must be higher than current highest bid and the starting bid."
         
         return redirect("listing", auction_id)
+    
+# Create feature for close an auction
+@require_POST
+def close_auction(request, auction_id):
+    if request.method == "POST":
+        # Take auction from AuctionListing or views 404
+        auction = get_object_or_404(AuctionListings, pk=auction_id)
+
+        # Change value auction.is_active to False
+        auction.is_active = not auction.is_active
+        auction.save()
+        return redirect('listing', auction_id)
+
+        

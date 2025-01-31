@@ -9,9 +9,15 @@
     <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
     <br>
     <p> {{ auction.description }}</p>
-    <p>Start Bid: ${{ auction.start_bid }}. Current Bid: ${{ current_bid }}</p>
+    <p>Start Bid: ${{ auction.start_bid }}. 
+        {% if current_bid %}
+            Current Bid: ${{ current_bid.bid_amount }} made by {{ current_bid.bidder }}
+        {% else %}
+            No bets have been placed! The starting bid ${{ auction.start_bid }} is the current bid.
+        {% endif %}
+    </p>
 
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and auction.is_active %}
         <form action="{% url 'bids' auction.id %}" method="post">
             {% csrf_token %}
             <input class="form-control" type="text" name="bid">
@@ -41,6 +47,12 @@
         {% else %}
             <li>Category: not selected </li>
         {% endif %}
+        
+        {% if not auction.is_active %}
+            <li>Listing has been clouse!</li>
+            <li>The winner is {{ current_bid.bidder }}</li>
+        {% endif %}
+
     </ul>
     
     <!-- Create the able to add or remove the item to "Watchlist" -->
@@ -55,8 +67,16 @@
                 {%  csrf_token %}
                 <input type="submit" value="Add To Watchlist">
             </form>
+            {% if request.user == auction.author and auction.is_active %}
+                <form action="{% url 'close_auction' auction.id %}" method="post">
+                {%  csrf_token %}
+                    <input type="submit" value="Close Auction">
+                </form>
+            {% endif %}
         {% endif %}
         
     {% endif %}
+
+    
 
 {% endblock %}
