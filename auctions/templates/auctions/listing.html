@@ -6,6 +6,13 @@
 
 {% block body %}
     <h3>Listing: {{ auction.title }} </h3>
+
+    {% if not auction.is_active and winner %}
+        <div class="alert alert-info">
+            <strong>{{ winner_message }}</strong>.
+        </div>
+    {% endif %}
+
     <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
     <br>
     <p> {{ auction.description }}</p>
@@ -50,9 +57,8 @@
         
         {% if not auction.is_active %}
             <li>Listing has been clouse!</li>
-            <li>The winner is {{ current_bid.bidder }}</li>
+            <li>The winner is {{ current_bid.bidder }} with bid ${{ current_bid.bid_amount }}</li>
         {% endif %}
-
     </ul>
     
     <!-- Create the able to add or remove the item to "Watchlist" -->
@@ -74,7 +80,29 @@
                 </form>
             {% endif %}
         {% endif %}
-        
+        <!-- Created a comments container -->
+         <div>
+            {% for comment in comments %}
+                <div>
+                    <p>{{comment.author}} ({{comment.comment_time}})</p>
+                    <p>{{comment.comment}}</p>
+                </div>
+            {% empty %}
+                <div>
+                    <p>No comments</p>
+                </div>
+            {% endfor %}
+         </div>
+         
+         <!-- Created an add comments container -->
+         <div>
+            <form action="{% url 'add_comment' auction.id %}" method="post">
+                {% csrf_token %}
+                <label for="content">Enter your comment</label>
+                <textarea class="form-control" rows="5" name="comment" id="content"></textarea>
+                <input type="submit">
+            </form>
+         </div>
     {% endif %}
 
     

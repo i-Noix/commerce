@@ -192,17 +192,28 @@ def listing(request, auction_id):
     # Take object from Bids that has highest bid_amount for this auction
     highest_bid = auction.bids.all().order_by('-bid_amount').first()
 
+    # Take all comments for this auction
+    comments = auction.comments.all()
+
     # if user is authenticated take user watchlist
     if request.user.is_authenticated:
         user_watchlist = Watchlist.objects.filter(user=request.user)
         auction_ids_from_watchlist = user_watchlist.values_list('auction__id', flat=True)
+        if request.user == highest_bid.bidder:
+            winner = True
+            winner_message = f"Conglaturation! Your has won this auction with bid ${highest_bid.bid_amount}"
+        else:
+            winner = False
 
         return render(request, "auctions/listing.html", {
             "auction": auction,
             "watchlist": auction_ids_from_watchlist,
             "current_bid": highest_bid,
             "success_message": request.session.pop('success_message', None),
-            "error_message": request.session.pop('error_message', None)
+            "error_message": request.session.pop('error_message', None),
+            "winner_message": winner_message,
+            "winner": winner,
+            "comments": comments
         })
     
     else:
@@ -214,46 +225,65 @@ def listing(request, auction_id):
 # Created bid feature on listing page
 @require_POST
 def bids(request, auction_id):
-    if request.method == "POST":
-        # Take bid that user input
-        bid = float(request.POST["bid"])
+    # Take bid that user input
+    bid = float(request.POST["bid"])
 
-        # Take auction for this bid
-        auction = get_object_or_404(AuctionListings, pk=auction_id)
+    # Take auction for this bid
+    auction = get_object_or_404(AuctionListings, pk=auction_id)
 
-        # Take all bids of that auction in Bids
-        bids_for_auction = auction.bids.all()
+    # Take all bids of that auction in Bids
+    bids_for_auction = auction.bids.all()
 
-        # Take only bid from Queryset and max bid
-        only_bids = bids_for_auction.values_list("bid_amount", flat=True)
-        max_bid=max(only_bids, default=0)
+    # Take only bid from Queryset and max bid
+    only_bids = bids_for_auction.values_list("bid_amount", flat=True)
+    max_bid=max(only_bids, default=0)
 
-        # Check if bid >= start bid and > highest bid_amount
-        if bid >= auction.start_bid and bid > max_bid:
-            # Add bid to Bids
-            new_bid = Bids (
-                auction = auction,
-                bidder = request.user,
-                bid_amount = bid
-            )
-            # Save new bid
-            new_bid.save()
-            request.session['success_message'] = "Your bid was succeful!"
-        else:
-            request.session['error_message'] = "Your bid must be higher than current highest bid and the starting bid."
-        
-        return redirect("listing", auction_id)
+    # Check if bid >= start bid and > highest bid_amount
+    if bid >= auction.start_bid and bid > max_bid:
+        # Add bid to Bids
+        new_bid = Bids (
+            auction = auction,
+            bidder = request.user,
+            bid_amount = bid
+        )
+        # Save new bid
+        new_bid.save()
+        request.session['success_message'] = "Your bid was succeful!"
+    else:
+        request.session['error_message'] = "Your bid must be higher than current highest bid and the starting bid."
+    
+    return redirect("listing", auction_id)
     
 # Create feature for close an auction
 @require_POST
 def close_auction(request, auction_id):
-    if request.method == "POST":
-        # Take auction from AuctionListing or views 404
-        auction = get_object_or_404(AuctionListings, pk=auction_id)
+    # Take auction from AuctionListing or views 404
+    auction = get_object_or_404(AuctionListings, pk=auction_id)
 
-        # Change value auction.is_active to False
-        auction.is_active = not auction.is_active
-        auction.save()
-        return redirect('listing', auction_id)
+    # Change value auction.is_active to False
+    auction.is_active = not auction.is_active
+    auction.save()
+    return redirect('listing', auction_id)
+
+# Create feature for add comment
+@require_POST
+def add_comment(request, auction_id):
+    # Take auction from AuctionListing
+    auction = get_object_or_404(AuctionListings, pk=auction_id)
+
+    # Created a new object and add to Comments
+    new_comment = Comments (
+        auction = auction,
+        comment = request.POST.get("comment"), 
+        author=request.user
+        )
+
+    # Save new_comment and save message for user in session
+    new_comment.save()
+    request.session["add_message"] = "Your comment has been added!"
+
+    # Redirect user to the page listing
+    return redirect('listing', auction_id)
+
 
         
