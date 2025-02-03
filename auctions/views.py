@@ -46,16 +46,9 @@ class CreatePageForm(forms.Form):
 
 # Views all active auction in page active listing
 def index(request):
-    auctions = AuctionListings.objects.all()
-    winner_list = []
-    for auction in auctions:
-        if not auction.is_active:
-            # Take the winner of auction use the related name from Bids
-            winner_bid = auction.bids.all().order_by('-bid_amount').first()
-            winner_list.append(winner_bid)
+    auctions = AuctionListings.objects.filter(is_active=True)
     return render(request, "auctions/index.html", {
-        "auctions": AuctionListings.objects.all(),
-        "winner_list": winner_list
+        "auctions": auctions
     })
 
 
@@ -306,4 +299,15 @@ def category(request, category_id):
         "auctions": auctions
     })
 
+def closed_auctions_page(request):
+    closed_auctions = AuctionListings.objects.filter(is_active=False)
+    winner_list = []
+    for auction in closed_auctions:
+        # Take the winner of auction use the related name from Bids
+        winner_bid = auction.bids.all().order_by('-bid_amount').first()
+        winner_list.append(winner_bid)
+    return render(request, "auctions/closed_auctions_page.html", {
+        "closed_auctions": closed_auctions,
+        "winner_list": winner_list
+    })
         

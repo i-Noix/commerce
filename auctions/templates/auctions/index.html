@@ -13,16 +13,7 @@
                     <li><span style="font-weight: bold;">Price:</span> ${{ auction.start_bid }}</li>
                     <li>Created {{ auction.date_time }}</li>
                 </ul>
-                {% if not auction.is_active %}
-                    {% for winner in winner_list %}
-                        {% if auction == winner.auction %}
-                            <h5>The auction has been closed! The winner is {{ winner.bidder }} with bid ${{ winner.bid_amount }}</h5>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
             </div>
         </div>
     {% endfor %}
-    
-
 {% endblock %}
