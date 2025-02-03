@@ -1,19 +1,113 @@
-body {
-    padding: 10px;
-}
-
-/* Style for index.html */
-.auction_container {
-    margin: 20px; 
-    padding: 10px; 
-    display: flex; 
-    align-items: center; 
-    width: 80%; 
+* {
     box-sizing: border-box;
 }
 
-.auction_content {
-    margin-right: 20px; 
-    height: 400px; 
-    width: 450px;
+body {
+    margin: 0px;
+    padding: 0px;
+    background-color: aliceblue;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100%;
+    width: auto;
+}
+
+/* Style for layout.html */
+/* Navbar */
+.navContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: auto;
+    height: auto;
+}
+
+.navTitle {
+    padding-left: 10px;
+    min-height: 40px;
+    height: 40px;
+    min-width: 180px;
+}
+.cinzel-decorative-bold {
+    font-family: "Cinzel Decorative", serif;
+    font-weight: 900;
+    font-style: normal;
+}
+
+.navSignIn {
+    display: flex;
+    align-items: end;
+    padding-left: 5px;
+    height: 40px;
+    min-height: 40px;
+    min-width: 180px;
+}
+
+.navSignIn_avatar {
+    height: 100%;
+    width: 40px;
+    padding: 5px;
+    margin-right: 5px;
+    min-width: 40px;
+}
+
+.navSignIn_avatar svg {
+    height: 100%;
+    width: 100%;
+}
+
+.login svg {
+    color: green;
+}
+
+.logout svg {
+    color: #000;
+}
+
+.navSignIn_authorization_message {
+    width: auto;
+    min-width: 150px;
+}
+
+.nav_navigation_bar {
+    margin-top: 10px;
+}
+
+/* Style for index.html */
+.page_header {
+    padding-left: 25px;
+    width: auto;
+    min-width: 300px;
+}
+
+.auctionsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid blue;
+    background: #fff;
+    height: 40vh;
+    overflow: hidden;
+    margin: 15px 25px;
+}
+
+.auction_image {
+    display: flex;
+    justify-content: center;
+    border: 1px solid red;
+    background-color: #fff;
+    height: 80%;
+    width: 30%;
+}
+
+.auction_image img {
+    height: auto;
+    max-width: 100%;
+    border: 1px solid #000;
+}
+
+.auction_describe {
+    border: 1px solid red;
+    height: 50%;
+    min-height: 50%;
 }

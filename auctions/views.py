@@ -46,7 +46,7 @@ class CreatePageForm(forms.Form):
 
 # Views all active auction in page active listing
 def index(request):
-    auctions = AuctionListings.objects.filter(is_active=True)
+    auctions = AuctionListings.objects.filter(is_active=True).order_by("-date_time")
     return render(request, "auctions/index.html", {
         "auctions": auctions
     })
