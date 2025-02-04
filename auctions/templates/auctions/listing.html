@@ -5,106 +5,118 @@
 {% endblock %}
 
 {% block body %}
-    <h3>Listing: {{ auction.title }} </h3>
-
-    {% if not auction.is_active and winner %}
-        <div class="alert alert-info">
-            <strong>{{ winner_message }}</strong>.
+    <div class="listing_container">
+        <div class="header_area">
+            <h3>Listing: {{ auction.title }}</h3>
+            {% if not auction.is_active and winner %}
+                <div class="alert alert-info">
+                    <strong>{{ winner_message }}</strong>.
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-
-    <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
-    <br>
-    <p> {{ auction.description }}</p>
-    <p>Start Bid: ${{ auction.start_bid }}. 
-        {% if current_bid %}
-            Current Bid: ${{ current_bid.bid_amount }} made by {{ current_bid.bidder }}
-        {% else %}
-            No bets have been placed! The starting bid ${{ auction.start_bid }} is the current bid.
-        {% endif %}
-    </p>
-
-    {% if user.is_authenticated and auction.is_active %}
-        <form action="{% url 'bids' auction.id %}" method="post">
-            {% csrf_token %}
-            <input class="form-control" type="text" name="bid">
-            <input type="submit" value="Place Bid">
-        </form>
-        {% if error_message %}
-            <div class="alert alert-warning">
-                <strong>Warning!</strong> {{ error_message }}</a>
+        <div class="image_area">
+            {% if auction.image_url %}
+                <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+            {% else %}
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNNLEL-qmmLeFR1nxJuepFOgPYfnwHR56vcw&s" alt="items: No image available">
+            {% endif %}
+        </div>
+        <div class="desc_area">
+            <p> {{ auction.description }}</p>
+            <p>Start Bid: <span style="color: red;">${{ auction.start_bid }}</span></p>
+                {% if current_bid %}
+                    <p>
+                        Current Bid: <span style="color: #007bff;">${{ current_bid.bid_amount }}</span> made by <span style="color: #007bff; font-weight: bold; ">{{ current_bid.bidder }}</span>
+                    </p>
+                {% else %}
+                    <p>
+                        No bets have been placed! The starting bid ${{ auction.start_bid }} is the current bid.
+                    </p>
+                {% endif %}
+            </p>
+        </div>
+        {% if user.is_authenticated and auction.is_active %}
+            <div class="bids_area">
+                {% if error_message %}
+                    <div class="alert alert-warning">
+                        <strong>Warning!</strong> {{ error_message }}</a>
+                    </div>
+                {% endif %}
+                {% if success_message %}
+                <div class="alert alert-success">
+                    <strong>Success!</strong> {{ success_message }}</a>
+                </div>
+                {% endif %}
+                <form action="{% url 'bids' auction.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="form-control" type="text" name="bid">
+                    <input class="btn btn-primary" type="submit" value="Place Bid">
+                </form>
+                
             </div>
         {% endif %}
-        {% if success_message %}
-        <div class="alert alert-success">
-            <strong>Success!</strong> {{ success_message }}</a>
+        <div class="details_area">
+            <h5>Details:</h5>
+            <ul>
+                <li>Listed by: {{ auction.author }}</li>
+                {% if auction.categories.all %}
+                    <li>Category: 
+                        {% for category in auction.categories.all %}
+                            {{ category.name }} {% if not forloop.last %}, {% endif %} 
+                        {% endfor %}
+                    </li>
+                {% else %}
+                    <li>Category: not selected </li>
+                {% endif %}
+                {% if not auction.is_active %}
+                    <li style="color: red;">Listing has been clouse!</li>
+                    <li>The winner is <span style="color: #007bff; font-weight: bold;">{{ current_bid.bidder }}</span> with bid <span style="color: #007bff;">${{ current_bid.bid_amount }}</span></li>
+                {% endif %}
+            </ul>
         </div>
-        {% endif %}
-    {% endif %}
-
-    <h5>Details</h5>
-    <ul>
-        <li>Listed by: {{ auction.author }}</li>
-        {% if auction.categories.all %}
-            <li>Category: 
-                {% for category in auction.categories.all %}
-                    {{ category.name }} {% if not forloop.last %}, {% endif %} 
-                {% endfor %}
-            </li>
-        {% else %}
-            <li>Category: not selected </li>
-        {% endif %}
-        
-        {% if not auction.is_active %}
-            <li>Listing has been clouse!</li>
-            <li>The winner is {{ current_bid.bidder }} with bid ${{ current_bid.bid_amount }}</li>
-        {% endif %}
-    </ul>
-    
-    <!-- Create the able to add or remove the item to "Watchlist" -->
-    {% if user.is_authenticated %}
-        {% if auction.id in watchlist %}
-            <form action="{% url 'remove_from_watchlist' auction.id %}" method="post">
-                {% csrf_token %}
-                <input type="submit" value="Remove From Watchlist">
-            </form>
-        {% else %}
-            <form action="{% url 'add_to_watchlist' auction.id %}" method="post">
-                {%  csrf_token %}
-                <input type="submit" value="Add To Watchlist">
-            </form>
-            {% if request.user == auction.author and auction.is_active %}
-                <form action="{% url 'close_auction' auction.id %}" method="post">
-                {%  csrf_token %}
-                    <input type="submit" value="Close Auction">
+        <!-- Create the able to add or remove the item to "Watchlist" -->
+        {% if user.is_authenticated %}
+            <div class="watchlist_area">
+                {% if auction.id in watchlist %}
+                    <form action="{% url 'remove_from_watchlist' auction.id %}" method="post">
+                        {% csrf_token %}
+                        <input class="btn btn-danger" type="submit" value="Remove From Watchlist">
+                    </form>
+                {% else %}
+                    <form action="{% url 'add_to_watchlist' auction.id %}" method="post">
+                        {%  csrf_token %}
+                        <input class="btn btn-success" type="submit" value="Add To Watchlist">
+                    </form>
+                    {% if request.user == auction.author and auction.is_active %}
+                        <form action="{% url 'close_auction' auction.id %}" method="post">
+                        {%  csrf_token %}
+                            <input class="btn btn-warning" type="submit" value="Close Auction">
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <!-- Created an add comments container -->
+            <div class="comment_area">
+                <form action="{% url 'add_comment' auction.id %}" method="post">
+                    {% csrf_token %}
+                    <label for="content">Enter your comment:</label>
+                    <textarea class="form-control" rows="5" name="comment" id="content"></textarea>
+                    <input class="btn btn-secondary" type="submit" value="Submit">
                 </form>
-            {% endif %}
+             </div>
+            <div class="all_comments">
+                {% for comment in comments %}
+                    <div>
+                        <p>{{comment.author}} ({{comment.comment_time}})</p>
+                        <p>{{comment.comment}}</p>
+                    </div>
+                {% empty %}
+                    <div>
+                        <p>No comments</p>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
-        <!-- Created a comments container -->
-         <div>
-            {% for comment in comments %}
-                <div>
-                    <p>{{comment.author}} ({{comment.comment_time}})</p>
-                    <p>{{comment.comment}}</p>
-                </div>
-            {% empty %}
-                <div>
-                    <p>No comments</p>
-                </div>
-            {% endfor %}
-         </div>
-         
-         <!-- Created an add comments container -->
-         <div>
-            <form action="{% url 'add_comment' auction.id %}" method="post">
-                {% csrf_token %}
-                <label for="content">Enter your comment</label>
-                <textarea class="form-control" rows="5" name="comment" id="content"></textarea>
-                <input type="submit">
-            </form>
-         </div>
-    {% endif %}
-
-    
+    </div>
 
 {% endblock %}

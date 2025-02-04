@@ -1,0 +1,36 @@
+{% extends 'auctions/layout.html' %}
+
+{% block title %}Watchlist{% endblock %}
+
+{% block body %}
+    <div class="page_header">
+        <h4>Watchlist:</h4>
+    </div>
+    {% for auction in watchlist %}
+        <div class="auctionsContainer">
+            <div class="auction_image">
+                <a target="_self" href="{% url 'listing' auction.id %}">
+                    {% if auction.image_url %}
+                        <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+                    {% else %}
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNNLEL-qmmLeFR1nxJuepFOgPYfnwHR56vcw&s" alt="items: No image available">
+                    {% endif %}
+                </a>
+            </div>
+            <div class="auction_describe">
+                <div class="auction_title">
+                    <h5>Listing: <a href="{% url 'listing' auction.id %}">{{ auction.title }}</a></h5>
+                </div>
+                <div class="auction_details">
+                    <ul>
+                        <li><span style="font-weight: bold;">Price:</span> ${{ auction.start_bid }}</li>
+                        <li>Created {{ auction.date_time }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <h5>No auction listing added</h5>
+    {% endfor %}
+    
+{% endblock %}

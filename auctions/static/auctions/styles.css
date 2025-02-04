@@ -39,7 +39,7 @@ body {
     padding-left: 5px;
     height: 40px;
     min-height: 40px;
-    min-width: 180px;
+    min-width: 300px;
 }
 
 .navSignIn_avatar {
@@ -65,7 +65,7 @@ body {
 
 .navSignIn_authorization_message {
     width: auto;
-    min-width: 150px;
+    min-width: 300px;
 }
 
 .nav_navigation_bar {
@@ -79,35 +79,271 @@ body {
     min-width: 300px;
 }
 
+/* Auction Listing Container */
 .auctionsContainer {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
     align-items: center;
-    border: 1px solid blue;
-    background: #fff;
-    height: 40vh;
-    overflow: hidden;
-    margin: 15px 25px;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    border-radius: 5px;
 }
 
-.auction_image {
+/* Auction image */
+.auction_image img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+.auction_image img:hover {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+/* Auction description */
+.auction_describe {
+    flex: 1;
+}
+
+/* Auction title */
+.auction_title h5 {
+    font-size: 1.5em;
+    margin: 0;
+    color: #007bff;
+}
+
+/* Auction details */
+.auction_details ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+}
+
+.auction_details ul li {
+    margin: 5px 0;
+}
+
+/* Style for login and register form */
+.login_form, .register_form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+}
+
+.login_form div, .register_form div {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Style for form */
+.login_form form, .register_form form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login_form .form-group, .register_form .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.login_form .form-control, .register_form .form-control {
+    width: 100%;
+}
+
+.login_form a, .register_form a {
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+}
+
+/* Style for creating page */
+.create_auction_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+/* Header form */
+.create_auction_form h5 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #343a40;
+    text-align: center;
+}
+
+/* Style for form */
+.create_auction_form form {
+    width: 100%;
+}
+
+/* Margun between form element */
+.create_auction_form .form-group {
+    margin-bottom: 15px;
+}
+
+/* Create auction button */
+.create_auction_form .btn-success {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.2em;
+    border-radius: 5px;
+}
+
+.create_auction_form .btn-success:hover {
+    background-color: #218838;
+    transition: background-color 0.3s ease;
+}
+
+/* Style for listing page */
+/* Common container */
+.listing_container {
+    display: grid;
+    gap: 20px 20px;
+    grid-template-areas:
+        "header_area header_area"
+        "image_area desc_area"
+        "image_area bids_area"
+        "image_area details_area"
+        "watchlist_area comment_area"
+        "all_comments all_comments";
+    grid-template-columns: 1fr 3fr;
+    margin: 20px 20px;
+}
+
+.header_area {
+    grid-area: header_area;
+}
+
+.header_area h3 {
+    text-align: center;
+}
+
+.image_area {
+    grid-area: image_area;
     display: flex;
     justify-content: center;
-    border: 1px solid red;
-    background-color: #fff;
-    height: 80%;
-    width: 30%;
+    align-items: center;
+    width: 100%;
 }
 
-.auction_image img {
-    height: auto;
+.image_area img{
     max-width: 100%;
-    border: 1px solid #000;
+    height: auto;
+    border-radius: 5px;
 }
 
-.auction_describe {
-    border: 1px solid red;
-    height: 50%;
-    min-height: 50%;
+.desc_area {
+    grid-area: desc_area;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    flex: 1;
+    padding: 20px;
+}
+
+.desc_area > p {
+    font-size: 1.1em;
+}
+
+.bids_area {
+    grid-area: bids_area;
+    padding: 0px 0px 0px 20px;
+}
+
+.bids_area form {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    max-width: 200px;
+}
+
+.bids_area .form-control {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.bids_area input[type="submit"] {
+    align-self: center;
+}
+
+.details_area {
+    grid-area: details_area;
+    padding: 0 0 0 20px;
+}
+
+.details_area li {
+    margin-left: -20px;
+    font-size: 1em;
+}
+
+.watchlist_area {
+    grid-area: watchlist_area;
+    display: flex;
+    justify-content: center;
+}
+
+.watchlist_area .btn-warning {
+    margin-left: 20px;
+}
+
+.comment_area {
+    grid-area: comment_area;
+}
+
+.comment_area label {
+    font-size: 1.1em;
+}
+
+.comment_area .form-control {
+    font-size: 1.1em;
+}
+
+.comment_area .btn {
+    margin-top: 10px;
+}
+
+.all_comments {
+    grid-area: all_comments;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.all_comments div {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.all_comments div p {
+    margin: 0;
+    font-size: 1em;
+}
+
+.all_comments div p:first-child {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.all_comments div p:last-child {
+    color: #343a40;
+}
+
+.all_comments div:last-child {
+    border-bottom: none;
 }

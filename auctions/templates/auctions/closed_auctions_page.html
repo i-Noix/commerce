@@ -1,0 +1,34 @@
+{% extends 'auctions/layout.html' %}
+
+{% block title %}Closed Listings{% endblock %}
+
+{% block body %}
+<h2>Closed Listings</h2>
+{% for auction in closed_auctions %}
+    <div class="auctionsContainer">
+        <div class="auction_image">
+            {% if auction.image_url %}
+                <img style="opacity: 0.5;" src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+            {% else %}
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNNLEL-qmmLeFR1nxJuepFOgPYfnwHR56vcw&s" alt="items: No image available">
+            {% endif %}
+        </div>
+        <div class="auction_describe">
+            <div class="auction_title">
+                <h5><a href="{% url 'listing' auction.id %}">{{ auction.title }}</a></h5>
+            </div>
+            <div class="auction_details">
+                <ul>
+                    <li><span style="font-weight: bold;">Price:</span> ${{ auction.start_bid }}</li>
+                    <li>Created {{ auction.date_time }}</li>
+                </ul>
+                {% for winner in winner_list %}
+                    {% if auction == winner.auction %}
+                        <h5 style="color: red;">The auction has been closed! The winner is <span style="color: black; font-weight: bold;">{{ winner.bidder }}</span> with bid ${{ winner.bid_amount }}</h5>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
