@@ -8,7 +8,13 @@
     {% for auction in auctions %}
     <div class="auctionsContainer">
         <div class="auction_image">
-            <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+            <a target="_self" href="{% url 'listing' auction.id %}">
+                {% if auction.image_url %}
+                    <img src="{{ auction.image_url }}" alt="items: {{ auction.title }}">
+                {% else %}
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNNLEL-qmmLeFR1nxJuepFOgPYfnwHR56vcw&s" alt="items: No image available">
+                {% endif %}
+            </a>
         </div>
         <div class="auction_describe">
             <div class="auction_title">
