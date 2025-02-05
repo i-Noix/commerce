@@ -173,8 +173,16 @@ def remove_from_watchlist(request, auction_id):
 def watchlist_page(request):
     user_watchlist = Watchlist.objects.filter(user=request.user)
     auction_ids_from_watchlist = AuctionListings.objects.filter(id__in=user_watchlist.values_list('auction', flat=True))
+    # Take closed auctins and winner
+    closed_auctions = AuctionListings.objects.filter(is_active=False)
+    winner_list = []
+    for auction in closed_auctions:
+        # Take the winner of auction use the related name from Bids
+        winner_bid = auction.bids.all().order_by('-bid_amount').first()
+        winner_list.append(winner_bid)
     return render(request, "auctions/watchlist_page.html", {
-        "watchlist": auction_ids_from_watchlist
+        "watchlist": auction_ids_from_watchlist,
+        "winner_list": winner_list
     })
 
 # Create page listing
